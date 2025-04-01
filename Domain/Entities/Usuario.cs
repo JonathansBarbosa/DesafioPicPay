@@ -27,6 +27,7 @@ namespace PicPaySimplificado.Domain.Entities
         public decimal Saldo { get; set; }
 
         public bool IsLojista { get; set; }
+        public string Tipo { get; set; }
 
         public bool ValidarCpfCnpj()
         {

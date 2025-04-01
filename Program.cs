@@ -3,7 +3,6 @@ using PicPaySimplificado.Application;
 using PicPaySimplificado.Controllers;
 using PicPaySimplificado.Infrastructure.Persistence;
 using PicPaySimplificado.Application.Interfaces;
-using PicPaySimplificado.Application.Services;
 using PicPaySimplificado.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore; // Importante para o UseSqlServer
 using Pomelo.EntityFrameworkCore.MySql;

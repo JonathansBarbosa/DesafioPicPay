@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using PicPaySimplificado.Application.Interfaces;
 using PicPaySimplificado.Domain.Entities;
 using PicPaySimplificado.Infrastructure.Persistence; // Namespace correto para o DbContext
-using PicPaySimplificado.Application.Interfaces; // Para a interface de repositório (explicarei adiante)
 
-namespace PicPaySimplificado.Application.Services // Namespace correto para serviços de aplicação
+namespace PicPaySimplificado.Application // Namespace correto para serviços de aplicação
 {
     public class TransacaoService : ITransacaoService // Implementa uma interface
     {
