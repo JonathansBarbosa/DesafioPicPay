@@ -5,6 +5,7 @@ using PicPaySimplificado.Domain;
 using PicPaySimplificado.Application.DTOs;
 using PicPaySimplificado.Application.Services;
 
+
 namespace PicPaySimplificado.Controllers
 {
     [ApiController]

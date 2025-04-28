@@ -1,11 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PicPaySimplificado.Application.DTOs;
-using PicPaySimplificado.Domain;
 using PicPaySimplificado.Domain.Entities;
-using PicPaySimplificado.Infrastructure;
 using PicPaySimplificado.Infrastructure.Persistence;
-using System.Security.Cryptography;
-using System.Text;
+using System;
+using System.Threading.Tasks;
 
 namespace PicPaySimplificado.Application.Services
 {
@@ -18,34 +16,69 @@ namespace PicPaySimplificado.Application.Services
             _context = context;
         }
 
-        public async Task<UsuarioDTO> CadastrarUsuario(UsuarioCadastroDTO usuarioCadastro)
+        public async Task<ResultadoCadastroUsuario> CadastrarUsuario(UsuarioCadastroDTO usuarioCadastro)
         {
+            // Verificar se já existe um usuário com o mesmo e-mail
             if (await _context.Usuarios.AnyAsync(u => u.Email == usuarioCadastro.Email))
-                throw new Exception("E-mail já cadastrado.");
+            {
+                return new ResultadoCadastroUsuario
+                {
+                    Sucesso = false,
+                    Mensagem = "E-mail já cadastrado."
+                };
+            }
 
-            string senhaHash = GerarHashSenha(usuarioCadastro.Senha);
+            // Verificar se já existe um usuário com o mesmo CPF/CNPJ
+            if (await _context.Usuarios.AnyAsync(u => u.CpfCnpj == usuarioCadastro.CpfCnpj))
+            {
+                return new ResultadoCadastroUsuario
+                {
+                    Sucesso = false,
+                    Mensagem = "CPF/CNPJ já cadastrado."
+                };
+            }
 
-            var usuario = new Usuario
+            // Criar o novo usuário
+            var novoUsuario = new Usuario
             {
                 Nome = usuarioCadastro.Nome,
                 Email = usuarioCadastro.Email,
-                Senha = senhaHash,
-                Tipo = usuarioCadastro.TipoUsuario
+                CpfCnpj = usuarioCadastro.CpfCnpj,
+                Tipo = usuarioCadastro.TipoUsuario,
+                Saldo = 0,
+                IsLojista = usuarioCadastro.TipoUsuario.ToLower() == "lojista"
             };
 
-            _context.Usuarios.Add(usuario);
+            // Validar CPF/CNPJ usando o método da própria entidade
+            if (!novoUsuario.ValidarCpfCnpj())
+            {
+                return new ResultadoCadastroUsuario
+                {
+                    Sucesso = false,
+                    Mensagem = "CPF/CNPJ inválido."
+                };
+            }
+
+            // Gerar o hash da senha com segurança
+            novoUsuario.SetSenha(usuarioCadastro.Senha);
+
+            // Salvar no banco de dados
+            _context.Usuarios.Add(novoUsuario);
             await _context.SaveChangesAsync();
 
-            return new UsuarioDTO { Id = usuario.Id, Nome = usuario.Nome, Email = usuario.Email, Tipo = usuario.Tipo };
-        }
-
-        private string GerarHashSenha(string senha)
-        {
-            using (var sha256 = SHA256.Create())
+            // Retornar DTO com sucesso
+            return new ResultadoCadastroUsuario
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(senha));
-                return Convert.ToBase64String(bytes);
-            }
+                Sucesso = true,
+                Mensagem = "Usuário cadastrado com sucesso!",
+                Usuario = new UsuarioDTO
+                {
+                    Id = novoUsuario.Id,
+                    Nome = novoUsuario.Nome,
+                    Email = novoUsuario.Email,
+                    Tipo = novoUsuario.Tipo
+                }
+            };
         }
     }
 }

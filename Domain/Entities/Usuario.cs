@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -130,5 +131,6 @@ namespace PicPaySimplificado.Domain.Entities
         {
             return BCrypt.Net.BCrypt.Verify(senha, Senha);
         }
+
     }
 }
